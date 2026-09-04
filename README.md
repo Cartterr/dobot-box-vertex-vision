@@ -80,6 +80,16 @@ It saves the annotated vision frame to `demo-output/e2e-vision.png` and the stat
 
 The plan prints the unmodified calibrated table coordinates. For visualization, the script scales that synthetic 300 × 200 mm table into the downloaded Magician model's reachable envelope around its home pose. It is intentionally not a real-cell transform. The example uses an 80 mm approach height, 15 mm pick/place height, and a fixed synthetic pickup point. Replace those only after measuring your fixture, TCP, rolls, camera calibration, robot reach, collision clearances, and emergency-stop process.
 
+## Conveyor video overlay demo
+
+Render a colorful, honest demonstration overlay on a conveyor clip:
+
+```powershell
+python -m src.conveyor_demo --source C:\path\to\open-top-box.mp4
+```
+
+The script marks the tracked quadrilateral's four ordered corners, confidence and pixel center, then saves MP4 + JSON trace to `demo-output`. The center is only a camera-space candidate until the source is calibrated to the real table plane; do not use it for robot motion before that step.
+
 ## Project layout
 
 - `src/app.py` — camera/image CLI and JSON output
