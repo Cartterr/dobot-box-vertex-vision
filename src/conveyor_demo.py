@@ -75,10 +75,12 @@ def main() -> int:
     parser.add_argument("--source", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=Path("demo-output/conveyor-vertices-demo.mp4"))
     parser.add_argument("--seconds", type=float, default=6.0)
+    parser.add_argument("--start-seconds", type=float, default=0.0, help="Start offset in the source video")
     args = parser.parse_args()
     capture = cv2.VideoCapture(str(args.source))
     if not capture.isOpened():
         raise SystemExit(f"Cannot open {args.source}")
+    capture.set(cv2.CAP_PROP_POS_MSEC, args.start_seconds * 1000)
     fps = capture.get(cv2.CAP_PROP_FPS) or 30.0
     input_width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
     input_height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -89,6 +91,8 @@ def main() -> int:
     args.output.parent.mkdir(parents=True, exist_ok=True)
     writer = cv2.VideoWriter(str(args.output), cv2.VideoWriter_fourcc(*"mp4v"), fps, output_size)
     previous_center = None
+    last_vertices = None
+    last_confidence = 0.0
     trace = []
     for index in range(int(args.seconds * fps)):
         ok, frame = capture.read()
@@ -97,6 +101,12 @@ def main() -> int:
         vertices, confidence = candidate_vertices(frame, roi, previous_center)
         if vertices is not None:
             previous_center = vertices.center
+            last_vertices, last_confidence = vertices, confidence
+        elif last_vertices is not None:
+            # Keep the last validated rim during a short low-contrast gap. The
+            # raw trace identifies which frames were freshly observed.
+            vertices, confidence = last_vertices, last_confidence * 0.98
+        if vertices is not None:
             trace.append({"frame": index, "confidence": round(confidence, 3), "vertices_px": vertices.as_dict()})
         writer.write(cv2.resize(draw_overlay(frame, vertices, confidence, index), output_size, interpolation=cv2.INTER_AREA))
     capture.release()
