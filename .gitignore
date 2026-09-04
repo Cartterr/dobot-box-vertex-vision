@@ -6,3 +6,5 @@ runs/
 models/*.pt
 config/calibration.yaml
 *.mp4
+.cache/
+demo-output/

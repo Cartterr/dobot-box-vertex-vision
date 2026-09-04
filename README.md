@@ -67,10 +67,25 @@ yolo detect train model=yolo26n.pt data=dataset.yaml epochs=100 imgsz=960
 
 Use the resulting `runs\detect\train\weights\best.pt` as `--weights`. Keep a held-out set and measure vertex error in millimetres after calibration; detection mAP alone is not a robot-placement acceptance criterion.
 
+## One-command E2E RoboDK demo
+
+RoboDK is already installed on this PC. This local demo creates a synthetic overhead camera image, detects its box, projects it to a 300 × 200 mm table frame, validates a 36 mm roll margin, produces a pick/place plan, and animates it with RoboDK's Dobot Magician model.
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -m src.demo --simulate
+```
+
+It saves the annotated vision frame to `demo-output/e2e-vision.png` and the station to `.cache/dobot_36mm_roll_vision_demo.rdk`. `--simulate` uses only RoboDK's `RUNMODE_SIMULATE`; it has no robot connection code. For a quick no-GUI validation, omit `--simulate`.
+
+The plan prints the unmodified calibrated table coordinates. For visualization, the script scales that synthetic 300 × 200 mm table into the downloaded Magician model's reachable envelope around its home pose. It is intentionally not a real-cell transform. The example uses an 80 mm approach height, 15 mm pick/place height, and a fixed synthetic pickup point. Replace those only after measuring your fixture, TCP, rolls, camera calibration, robot reach, collision clearances, and emergency-stop process.
+
 ## Project layout
 
 - `src/app.py` — camera/image CLI and JSON output
 - `src/geometry.py` — vertex ordering, contour extraction, homography, and safety check
+- `src/demo.py` — synthetic camera to safe 36 mm roll placement plan
+- `src/robodk_sim.py` — simulation-only Dobot Magician station builder
 - `config/calibration.example.yaml` — four-point table-plane calibration template
 - `tests/test_geometry.py` — deterministic geometry tests
 
