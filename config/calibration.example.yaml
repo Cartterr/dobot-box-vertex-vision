@@ -1,0 +1,13 @@
+# Corresponding points ordered top-left, top-right, bottom-right, bottom-left.
+# Pixel points are from the fixed camera. Table points are millimetres in the
+# same planar frame used by your Dobot program.
+image_points_px:
+  - [100.0, 100.0]
+  - [1180.0, 100.0]
+  - [1180.0, 860.0]
+  - [100.0, 860.0]
+table_points_mm:
+  - [0.0, 0.0]
+  - [300.0, 0.0]
+  - [300.0, 200.0]
+  - [0.0, 200.0]
